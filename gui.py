@@ -114,18 +114,21 @@ class App:
             self.replays = processed_replays.ProcessedReplays(self.username, self.replayPath)
         return self.replays.getWinrate()
 
-    def selGraph(self, **kwargs):
+    def selGraph(self, *args, **kwargs):
 	if kwargs.get("time") == "year":
 	    self.clearGraph()
-	    #self.analyzeData(dic, time = "year")
+	    self.analyzeData(self.getAPMDict(), time = "year")
 	
 	elif kwargs.get("time") == "month":
             self.clearGraph()
-            #self.analyzeData(dic, time = "month", year = kwargs.get("year"))
+            self.analyzeData(self.getAPMDict(), time = "month", year = kwargs.get("year"))
 
         elif kwargs.get("time") == "day":
             self.clearGraph()
-            #self.analyzeData(dic, time = "day", year = kwargs.get("year"), month = kwargs.get("month"))
+            self.analyzeData(self.getAPMDict(), time = "day", year = kwargs.get("year"), month = kwargs.get("month"))
+
+    def debug(self, *args):
+        print("a")
 
     def analyzeData(self, dic, **kwargs):
         """
@@ -203,7 +206,7 @@ class App:
             for i in range(len(data)):
                 self.c.create_line(80+dx+i*dx, 370, 80+dx+i*dx, 380)
                 self.c.create_text(80+dx/2+i*dx, 380, text = str(yr), tags=str(yr), activefill="Red")
-                self.c.tag_bind(str(yr),"<ButtonPress-1>", self.selGraph(time="month", year=str(yr)))
+                self.c.tag_bind(str(yr),"<ButtonPress-1>", lambda e: self.selGraph(time="month", year=str(yr)))
                 yr += 1
                     
         elif time == "month":
@@ -211,11 +214,11 @@ class App:
             dx = 103
             mon = 1
             Yid = self.c.create_text(700, 40, text = "Monthly Progress " + kwargs.get("year"), tags=kwargs.get("year"), activefill = "Red")
-            self.c.tag_bind(Yid, "<ButtonPress-1>", self.selGraph(time="year"))
+            self.c.tag_bind(Yid, "<ButtonPress-1>", lambda e: self.selGraph(time = "year"))
             for i in range(len(data)):
                 self.c.create_line(80+dx+i*dx, 370, 80+dx+i*dx, 380)
                 self.c.create_text(80+dx/2+i*dx, 380, text = calendar.month_name[mon], tags=calendar.month_name[mon], activefill = "Red")
-                #self.c.tag_bind(calendar.month_name[mon],"<ButtonPress-1>", self.selGraph(time="day", year = kwargs.get("year"), month=calendar.month_name[mon]))
+                self.c.tag_bind(calendar.month_name[mon],"<ButtonPress-1>", lambda e: self.selGraph(time="day", year = kwargs.get("year"), month=calendar.month_name[mon]))
 
                 mon += 1         
 
@@ -224,7 +227,7 @@ class App:
             dx = 40
             day = 1
             self.c.create_text(700, 40, text = "Daily Progress " + kwargs.get("month") + kwargs.get("year"), tags=kwargs.get("month"), activefill = "Red")
-            self.c.tag_bind(kwargs.get("month"), "<ButtonPress-1>", self.selGraph(time="year", year = kwargs.get("year")))
+            self.c.tag_bind(kwargs.get("month"), "<ButtonPress-1>", lambda e: self.selGraph(time="year", year = kwargs.get("year")))
 
             for i in range(len(data)):
                 self.c.create_line(80+dx+i*dx, 370, 80+dx+i*dx, 380)
