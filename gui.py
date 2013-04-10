@@ -1,6 +1,7 @@
 from Tkinter import *
 from tkFileDialog import *
 import calendar
+import processed_replays
 
 class App:
     def __init__(self, master):
@@ -8,6 +9,8 @@ class App:
         frame.pack()
 
         self.menuBar = Menu(master)
+        self.username = 'bonywonix' #TODO this needs to be set via preferences window
+        self.replays = None # This is so we can check for instances later
         
         #Replay Menu
 
@@ -92,13 +95,23 @@ class App:
 
     def selRep(self):
         filename = askopenfilename()
-        #pass to troy's stuff
-        print(filename)
+        self.replayPath = filename
 
     def selFol(self):
         dire = askdirectory()
-        #pass to troy's stuff
-        print(dire)
+        self.replayPath = dire
+        print( self.getAPMDict())
+        self.analyzeData(self.getAPMDict(), time = "year")
+
+    def getAPMDict(self):
+        if self.replays is None:
+            self.replays = processed_replays.ProcessedReplays(self.username, self.replayPath)
+        return self.replays.getAPM()
+
+    def getWRDict(self):
+        if self.replays is None:
+            self.replays = processed_replays.ProcessedReplays(self.username, self.replayPath)
+        return self.replays.getWinrate()
 
     def selGraph(self, **kwargs):
 	if kwargs.get("time") == "year":
