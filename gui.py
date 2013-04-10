@@ -102,6 +102,10 @@ class App:
         return repInfo
 
     def analyzeData(self, dic, **kwargs):
+        """
+        Takes a dictionary of average APMs along with potenital arguments. The optional
+        arguments are:
+        """
         avg = 0
         count = 0
         data = []
