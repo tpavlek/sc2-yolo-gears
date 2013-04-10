@@ -10,6 +10,7 @@ class App:
 
         self.menuBar = Menu(master)
         self.username = 'bonywonix' #TODO this needs to be set via preferences window
+        self.replayPath = "replays/"
         self.replays = None # This is so we can check for instances later
         
         #Replay Menu
@@ -44,7 +45,7 @@ class App:
         self.c.create_line(80, 370, 1320, 370, arrow=LAST)  #horizontal
         self.c.create_line(80, 30, 80, 370, arrow=FIRST)    #vertical
  
-        """ 
+        """
         data = [0,50,25,30,44,54,2,345,56,111,45,76,200,86,220,50,25,30,44,54,2,345,56,111,45,76,200,86,22,98,67]
 #x axis
         dx = 40
@@ -64,16 +65,16 @@ class App:
         x = []
         y = []
         for i in range(len(data)):
-            self.c.create_oval(80+dx/2+i*dx, 370-data[i]*33/interval, 80+dx/2+i*dx, 370-data[i]*33/interval, fill = "black", width = 4)
+            self.c.create_oval(80+dx/2+i*dx, 370-data[i]*33/interval, 80+dx/2+i*dx, 370-data[i]*33/interval, fill = "blue", width = 4)
             x.append(80+dx/2+i*dx)
             y.append(370-data[i]*33/interval)
 
         for i in range(len(data)-1):
-            self.c.create_line(x[i],y[i],x[i+1],y[i+1])
+            self.c.create_line(x[i],y[i],x[i+1],y[i+1],fill = "blue")
 	"""
-	
-        b = Button(frame, text = "APM", command = self.analyzeData)
-        b.pack()
+	self.analyzeData(self.getAPMDict(), time ="month", year = "2013")
+        #b = Button(frame, text = "APM", command = self.analyzeData(self.getAPMDict(), time ="month", year = "2013" ))
+        #b.pack()
 
         #Table Display
         self.c.create_rectangle(25, 450, 1375, 875, outline="green", fill="black")
@@ -142,7 +143,10 @@ class App:
                     if k.find(str(yr)) != -1:
                         avg += int(dic.get(k))
                         count += 1
-                data.append(avg/count)
+                if count:
+                    data.append(avg/count)
+                else:
+                    data.append(0)
                 yr += 1
                 count = 0
                 avg = 0
@@ -150,15 +154,19 @@ class App:
         elif kwargs.get("time") == "month":
             mon = 1
             yr = kwargs.get("year")
-            while not mon == 12:
+            while not mon == 13:
                 s = str(mon)
                 if mon < 10:
                     s = str(0)+str(mon)
                 for k in dic.keys():
-                    if k.find(s, beg=5, end=8) != -1 and k.find(yr) != -1:
+                    if k.find(s, 5, 8) != -1 and k.find(yr) != -1:
                         avg += int(dic.get(k))
                         count += 1
-                data.append(avg/count)
+                if count:
+                    data.append(avg/count)
+                else:
+                    data.append(0)
+
                 mon += 1
                 count = 0
                 avg = 0
@@ -175,12 +183,16 @@ class App:
                     if k.find(s, beg=5, end=8) != -1 and k.find(yr) != -1 and k.find(mon) != -1:
                         avg += int(dic.get(k))
                         count += 1
-                data.append(avg/count)
+                if count:
+                    data.append(avg/count)
+                else:
+                    data.append(0)
+
                 day += 1
                 count = 0
                 avg = 0
 
-        self.displayGraph(data, time, year = yr, month = mon)
+        self.displayGraph(data, kwargs.get("time"), year = yr, month = mon)
 
     def displayGraph(self, data, time, **kwargs):
         if time == "year":
@@ -198,12 +210,12 @@ class App:
             #x axis
             dx = 103
             mon = 1
-            self.c.create_text(700, 40, text = "Monthly Progress " + kwargs.get("year"), tags=kwargs.get("year"), activefill = "Red")
-            self.c.tag_bind(kwargs.get("year"), "<ButtonPress-1>", self.selGraph(time="year"))
+            Yid = self.c.create_text(700, 40, text = "Monthly Progress " + kwargs.get("year"), tags=kwargs.get("year"), activefill = "Red")
+            self.c.tag_bind(Yid, "<ButtonPress-1>", self.selGraph(time="year"))
             for i in range(len(data)):
                 self.c.create_line(80+dx+i*dx, 370, 80+dx+i*dx, 380)
                 self.c.create_text(80+dx/2+i*dx, 380, text = calendar.month_name[mon], tags=calendar.month_name[mon], activefill = "Red")
-                self.c.tag_bind(calendar.month_name[mon],"<ButtonPress-1>", self.selGraph(time="day", year = kwargs.get("year"), month=calendar.month_name[mon]))
+                #self.c.tag_bind(calendar.month_name[mon],"<ButtonPress-1>", self.selGraph(time="day", year = kwargs.get("year"), month=calendar.month_name[mon]))
 
                 mon += 1         
 
@@ -220,7 +232,9 @@ class App:
                 day += 1
 
         #y axis
-        interval = (max(data) - min(data))/10
+        if len(data) > 1:
+            interval = float(max(data) - min(data))/10
+        
         for i in range(11):
             self.c.create_line(70, 370-i*33, 80, 370-i*33)
             self.c.create_text(60, 370-i*33, text = str(min(data)+i*interval))
@@ -229,12 +243,12 @@ class App:
         x = []
         y = []
         for i in range(len(data)):
-            self.c.create_oval(80+dx/2+i*dx, 370-data[i]*33/interval, 80+dx/2+i*dx, 370-data[i]*33/interval, fill = "black", width = 4)
+            self.c.create_oval(80+dx/2+i*dx, 370-data[i]*33/interval, 80+dx/2+i*dx, 370-data[i]*33/interval, fill = "blue", width = 4)
             x.append(80+dx/2+i*dx)
             y.append(370-data[i]*33/interval)
 
         for i in range(len(data)-1):
-            self.c.create_line(x[i],y[i],x[i+1],y[i+1])
+            self.c.create_line(x[i],y[i],x[i+1],y[i+1], fill="blue")
 
     def clearGraph(self, *args):
 	self.c.create_rectangle(25,25,1375,400, outline="blue", fill="white")
