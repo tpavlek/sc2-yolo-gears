@@ -174,6 +174,7 @@ class App:
             #x axis
             dx = 320 
             yr = 2010
+            self.c.create_text(700, 40, text = "Yearly Progress")
             for i in range(len(data)):
                 self.c.create_line(80+dx+i*dx, 370, 80+dx+i*dx, 380)
                 self.c.create_text(80+dx/2+i*dx, 380, text = str(yr), tags=str(yr), activefill="Red")
@@ -184,6 +185,8 @@ class App:
             #x axis
             dx = 103
             mon = 1
+            self.c.create_text(700, 40, text = "Monthly Progress " + kwargs.get("year"), tags=kwargs.get("year"), activefill = "Red")
+            self.c.tag_bind(kwargs.get("year"), "<ButtonPress-1>", self.selGraph(time="year"))
             for i in range(len(data)):
                 self.c.create_line(80+dx+i*dx, 370, 80+dx+i*dx, 380)
                 self.c.create_text(80+dx/2+i*dx, 380, text = calendar.month_name[mon], tags=calendar.month_name[mon], activefill = "Red")
@@ -195,6 +198,9 @@ class App:
             #x axis
             dx = 40
             day = 1
+            self.c.create_text(700, 40, text = "Daily Progress " + kwargs.get("month") + kwargs.get("year"), tags=kwargs.get("month"), activefill = "Red")
+            self.c.tag_bind(kwargs.get("month"), "<ButtonPress-1>", self.selGraph(time="year", year = kwargs.get("year")))
+
             for i in range(len(data)):
                 self.c.create_line(80+dx+i*dx, 370, 80+dx+i*dx, 380)
                 self.c.create_text(80+dx/2+i*dx, 380, text = str(day), tags=str(day))
