@@ -15,9 +15,17 @@ class ProcessedReplays:
 
             Self.wr is a dictionary ordered by the race played by the active player,
             then subdictionaries of the race played by the opponent, which each have
-            a tuple: games won, games played
-
-
+            a two-item list: wins and total games. (This is not a tuple because tuples are immutable) 
+            
+            >>> p = ProcessedReplays('bonywonix', 'replays/')
+            >>> p.me
+            'bonywonix'
+            >>> type(p.replays) is list
+            True
+            >>> type(p.wr) is dict
+            True
+            >>> p.replays[0].real_type != '1v1'
+            False
             """
             self.me = username 
             self.apm = {}
@@ -31,13 +39,21 @@ class ProcessedReplays:
                     self.replays.append(replay)
         
         def getAPM(self):
+            """
+            Takes the internal object state and returns a dictionary, with key datetime
+            and value avg APM in the game at that datetime.
+            
+            NOTE: If two games are played at identical datetimes, the latter one will overwrite the first.
+            As games are typically up to 30 min long and datetime is precise to the second, this
+            will rarely occur, but it is possible. This prevents the same replay from being in the folder
+            several times and skewing the data.
+            """
 
             #we may in some cases call APM after the dict is already populated. 
             if self.apm != {}:
                 return self.apm
             
             for replay in self.replays:
-                
                 for team in replay.teams:
                     for player in team:
                         if player.name == self.me:
@@ -71,4 +87,6 @@ class ProcessedReplays:
             self.processedWR = True
             return self.getWinrates()
 
-
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod()
