@@ -30,7 +30,6 @@ class App:
         self.menuBar.add_cascade(label='Help', menu=self.Help)
         self.Help.add_command(label = 'About')
 
-
         master.config(menu = self.menuBar)
 
         
@@ -68,17 +67,28 @@ class App:
 
         for i in range(len(data)-1):
             self.c.create_line(x[i],y[i],x[i+1],y[i+1])
-        """
-
-        b = Button(master, text = "APM", command = self.analyzeData)
+	"""
+	
+        b = Button(frame, text = "APM", command = self.analyzeData)
         b.pack()
 
         #Table Display
         self.c.create_rectangle(25, 450, 1375, 875, outline="green", fill="black")
-        for i in range(10):
-            self.c.create_line(50, 450+42+42*i, 1325, 450+42+42*i, fill="green")
-            self.c.create_text(40, 450+42/2+42*i, text = "P", fill="green")
+	"""
+	MU = ["PvZ", "PvT", "PvP", "ZvZ", "ZvT", "ZvP", "TvZ", "TvT", "TvP"]
+	self.c.create_text(295, 471, text = "Wins", fill="green")
+	self.c.create_text(295+411, 471, text = "Losses", fill="green")
+	self.c.create_text(295+411*2, 471, text = "Win Rate", fill="green")
 
+	# horizontal
+        for i in range(10):
+            self.c.create_line(50, 450+42+42*i, 1324, 450+42+42*i, fill="green")
+	    if i > 0:
+		self.c.create_text(70, 450+42/2+42*i, text = MU[i-1], fill="green")
+	#vertical
+	for i in range(4):
+	    self.c.create_line(90+i*411, 462, 90+i*411, 870, fill="green")
+	"""
 
     def selRep(self):
         filename = askopenfilename()
@@ -89,23 +99,26 @@ class App:
         dire = askdirectory()
         #pass to troy's stuff
         print(dire)
-    
-    def getDataAPM(self):
-        file = open("processed.py", "r")
-        repInfo = []
 
-        for line in file:
-            line = line.rstrip()
-            fields = line.split(",")
-            self.repInfo.append((fields[0], fields[1]))
+    def selGraph(self, **kwargs):
+	if kwargs.get("time") == "year":
+	    self.clearGraph()
+	    #self.analyzeData(dic, time = "year")
+	
+	elif kwargs.get("time") == "month":
+            self.clearGraph()
+            #self.analyzeData(dic, time = "month", year = kwargs.get("year"))
 
-        return repInfo
+        elif kwargs.get("time") == "day":
+            self.clearGraph()
+            #self.analyzeData(dic, time = "day", year = kwargs.get("year"), month = kwargs.get("month"))
 
     def analyzeData(self, dic, **kwargs):
         """
         Takes a dictionary of average APMs along with potenital arguments. The optional
         arguments are:
         """
+
         avg = 0
         count = 0
         data = []
@@ -154,16 +167,17 @@ class App:
                 count = 0
                 avg = 0
 
-        self.displayGraph(data, time)
+        self.displayGraph(data, time, year = yr, month = mon)
 
-    def displayGraph(self, data, time):
+    def displayGraph(self, data, time, **kwargs):
         if time == "year":
             #x axis
             dx = 320 
             yr = 2010
             for i in range(len(data)):
                 self.c.create_line(80+dx+i*dx, 370, 80+dx+i*dx, 380)
-                self.c.create_text(80+dx/2+i*dx, 380, text = str(yr))
+                self.c.create_text(80+dx/2+i*dx, 380, text = str(yr), tags=str(yr), activefill="Red")
+                self.c.tag_bind(str(yr),"<ButtonPress-1>", self.selGraph(time="month", year=str(yr)))
                 yr += 1
                     
         elif time == "month":
@@ -172,7 +186,9 @@ class App:
             mon = 1
             for i in range(len(data)):
                 self.c.create_line(80+dx+i*dx, 370, 80+dx+i*dx, 380)
-                self.c.create_text(80+dx/2+i*dx, 380, text = calendar.month_name[mon])
+                self.c.create_text(80+dx/2+i*dx, 380, text = calendar.month_name[mon], tags=calendar.month_name[mon], activefill = "Red")
+                self.c.tag_bind(calendar.month_name[mon],"<ButtonPress-1>", self.selGraph(time="day", year = kwargs.get("year"), month=calendar.month_name[mon]))
+
                 mon += 1         
 
         elif time == "day":
@@ -181,7 +197,7 @@ class App:
             day = 1
             for i in range(len(data)):
                 self.c.create_line(80+dx+i*dx, 370, 80+dx+i*dx, 380)
-                self.c.create_text(80+dx/2+i*dx, 380, text = str(day))
+                self.c.create_text(80+dx/2+i*dx, 380, text = str(day), tags=str(day))
                 day += 1
 
         #y axis
@@ -201,11 +217,28 @@ class App:
         for i in range(len(data)-1):
             self.c.create_line(x[i],y[i],x[i+1],y[i+1])
 
+    def clearGraph(self, *args):
+	self.c.create_rectangle(25,25,1375,400, outline="blue", fill="white")
+        self.c.create_line(80, 370, 1320, 370, arrow=LAST)  #horizontal
+        self.c.create_line(80, 30, 80, 370, arrow=FIRST)    #vertical
+
+
     def displayTable(self, dic, **kwargs):
         if kwargs.get("type") == "winrate":
-            for i in range(9):
-                self.c.create_line(450+47+47*i, 50, 450+47+47*i, 1325)
-                self.c.create_text(450+47/2+47*i, 40, text = "P")
+            MU = ["PvZ", "PvT", "PvP", "ZvZ", "ZvT", "ZvP", "TvZ", "TvT", "TvP"]
+	    self.c.create_text(295, 471, text = "Wins", fill="green")
+	    self.c.create_text(295+411, 471, text = "Losses", fill="green")
+	    self.c.create_text(295+411*2, 471, text = "Win Rate", fill="green")
+
+	    # horizontal
+	    for i in range(10):
+	        self.c.create_line(50, 450+42+42*i, 1324, 450+42+42*i, fill="green")
+	        if i > 0:
+                    self.c.create_text(70, 450+42/2+42*i, text = MU[i-1], fill="green")
+	    #vertical
+	    for i in range(4):
+	        self.c.create_line(90+i*411, 462, 90+i*411, 870, fill="green")
+
            
 def start():
     root = Tk()
