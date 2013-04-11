@@ -26,7 +26,7 @@ class App:
         self.Ed = Menu(self.menuBar, tearoff = 0)
         self.menuBar.add_cascade(label='Edit', menu=self.Ed)  
           
-        self.Ed.add_command(label = 'Preferences')
+        self.Ed.add_command(label = 'Preferences', command=self.showPrefs)
 
         #Help Menu
 
@@ -104,7 +104,27 @@ class App:
 
         button = Button(popup, text="Close", command=popup.destroy)
         button.pack()
-    
+
+    def showPrefs(self):
+        popup = Toplevel()
+        popup.title("Edit Preferences")
+
+        msg = Message(popup, text="Choose username:");
+        msg.pack()
+
+        editField = Entry(popup)
+        editField.delete(0, END)
+        editField.insert(0, self.username)
+        editField.pack()
+
+        submit = Button(popup, text="Submit", command = lambda e = editField.get(), x = popup: self.editPrefs(e, x))
+        submit.pack()
+
+    def editPrefs(self, newUser, popup):
+        self.username = newUser
+        popup.destroy()
+
+
     def selRep(self):
         filename = askopenfilename()
         self.replayPath = filename
@@ -112,15 +132,16 @@ class App:
     def selFol(self):
         dire = askdirectory()
         self.replayPath = dire
-        self.analyzeData(self.getAPMDict(), time = "year")
+        self.clearGraph()
+        self.analyzeData(self.getAPMDict(True), time = "month", year="2013")
 
-    def getAPMDict(self):
-        if self.replays is None:
+    def getAPMDict(self, reload = False):
+        if self.replays is None or reload:
             self.replays = processed_replays.ProcessedReplays(self.username, self.replayPath)
         return self.replays.getAPM()
 
-    def getWRDict(self):
-        if self.replays is None:
+    def getWRDict(self, reload = False):
+        if self.replays is None or reload:
             self.replays = processed_replays.ProcessedReplays(self.username, self.replayPath)
         return self.replays.getWinrates()
 
