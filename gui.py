@@ -78,6 +78,8 @@ class App:
 
         #Table Display
         self.c.create_rectangle(25, 450, 1375, 875, outline="green", fill="black")
+        self.displayTable(self.getWRDict(), type="winrate")
+
 	"""
 	MU = ["PvZ", "PvT", "PvP", "ZvZ", "ZvT", "ZvP", "TvZ", "TvT", "TvP"]
 	self.c.create_text(295, 471, text = "Wins", fill="green")
@@ -112,7 +114,7 @@ class App:
     def getWRDict(self):
         if self.replays is None:
             self.replays = processed_replays.ProcessedReplays(self.username, self.replayPath)
-        return self.replays.getWinrate()
+        return self.replays.getWinrates()
 
     def selGraph(self, *args, **kwargs):
 	if kwargs.get("time") == "year":
@@ -139,8 +141,10 @@ class App:
         avg = 0
         count = 0
         data = []
+        
         if kwargs.get("time") == "year":
             yr = 2010
+            mon = 0
             while not yr == 2014:
                 for k in dic.keys():
                     if k.find(str(yr)) != -1:
@@ -162,7 +166,7 @@ class App:
                 if mon < 10:
                     s = str(0)+str(mon)
                 for k in dic.keys():
-                    if k.find(s, 5, 8) != -1 and k.find(yr) != -1:
+                    if k.find(s, 4, 7) != -1 and k.find(yr) != -1:
                         avg += int(dic.get(k))
                         count += 1
                 if count:
@@ -178,12 +182,15 @@ class App:
             day = 1
             yr = kwargs.get("year")
             mon = kwargs.get("month")
-            while not day == 31:
+            while not day == 32:
                 s = str(day)
                 if day < 10:
-                    s = str(0)+str(mon)
+                    s = str(0)+str(day)
+                m = str(list(calendar.month_name).index(mon))
+                if m < 10:
+                    m = str(0)+str(m)
                 for k in dic.keys():
-                    if k.find(s, beg=5, end=8) != -1 and k.find(yr) != -1 and k.find(mon) != -1:
+                    if k.find(s, 7, 10) != -1 and k.find(yr) != -1 and k.find(m, 4, 7) != -1:
                         avg += int(dic.get(k))
                         count += 1
                 if count:
@@ -194,7 +201,9 @@ class App:
                 day += 1
                 count = 0
                 avg = 0
+            print(data)
 
+        #print(data)
         self.displayGraph(data, kwargs.get("time"), year = yr, month = mon)
 
     def displayGraph(self, data, time, **kwargs):
@@ -203,41 +212,44 @@ class App:
             dx = 320 
             yr = 2010
             self.c.create_text(700, 40, text = "Yearly Progress")
-            for i in range(len(data)):
+            for i in range(4):
                 self.c.create_line(80+dx+i*dx, 370, 80+dx+i*dx, 380)
                 self.c.create_text(80+dx/2+i*dx, 380, text = str(yr), tags=str(yr), activefill="Red")
-                self.c.tag_bind(str(yr),"<ButtonPress-1>", lambda e: self.selGraph(time="month", year=str(yr)))
+                #self.c.tag_bind(str(yr),"<ButtonPress-1>", lambda e, y = yr: self.selGraph(time="month", year=str(y)))
                 yr += 1
-                    
+            for e in self.c.find_all():
+                print self.c.gettags(e)
+        
+
         elif time == "month":
             #x axis
             dx = 103
             mon = 1
             Yid = self.c.create_text(700, 40, text = "Monthly Progress " + kwargs.get("year"), tags=kwargs.get("year"), activefill = "Red")
             self.c.tag_bind(Yid, "<ButtonPress-1>", lambda e: self.selGraph(time = "year"))
-            for i in range(len(data)):
+            for i in range(12):
                 self.c.create_line(80+dx+i*dx, 370, 80+dx+i*dx, 380)
                 self.c.create_text(80+dx/2+i*dx, 380, text = calendar.month_name[mon], tags=calendar.month_name[mon], activefill = "Red")
-                self.c.tag_bind(calendar.month_name[mon],"<ButtonPress-1>", lambda e: self.selGraph(time="day", year = kwargs.get("year"), month=calendar.month_name[mon]))
-
+                self.c.tag_bind(calendar.month_name[mon],"<ButtonPress-1>", lambda e, m = mon: self.selGraph(time="day", year = kwargs.get("year"), month=calendar.month_name[m]))    
                 mon += 1         
-
+            
         elif time == "day":
             #x axis
             dx = 40
             day = 1
             self.c.create_text(700, 40, text = "Daily Progress " + kwargs.get("month") + kwargs.get("year"), tags=kwargs.get("month"), activefill = "Red")
-            self.c.tag_bind(kwargs.get("month"), "<ButtonPress-1>", lambda e: self.selGraph(time="year", year = kwargs.get("year")))
+            self.c.tag_bind(kwargs.get("month"), "<ButtonPress-1>", lambda e: self.selGraph(time="month", year = kwargs.get("year")))
 
-            for i in range(len(data)):
+            for i in range(31):
                 self.c.create_line(80+dx+i*dx, 370, 80+dx+i*dx, 380)
                 self.c.create_text(80+dx/2+i*dx, 380, text = str(day), tags=str(day))
                 day += 1
 
         #y axis
-        if len(data) > 1:
-            interval = float(max(data) - min(data))/10
-        
+        interval = float(max(data) - min(data))/10
+        if not interval:
+            interval = 10        
+
         for i in range(11):
             self.c.create_line(70, 370-i*33, 80, 370-i*33)
             self.c.create_text(60, 370-i*33, text = str(min(data)+i*interval))
@@ -261,7 +273,8 @@ class App:
 
     def displayTable(self, dic, **kwargs):
         if kwargs.get("type") == "winrate":
-            MU = ["PvZ", "PvT", "PvP", "ZvZ", "ZvT", "ZvP", "TvZ", "TvT", "TvP"]
+            race = ["Protoss", "Terran", "Zerg"]
+            MU = ["PvP", "PvT", "PvZ", "TvP", "TvT", "TvZ", "ZvP", "ZvT", "ZvZ"]
 	    self.c.create_text(295, 471, text = "Wins", fill="green")
 	    self.c.create_text(295+411, 471, text = "Losses", fill="green")
 	    self.c.create_text(295+411*2, 471, text = "Win Rate", fill="green")
@@ -274,6 +287,28 @@ class App:
 	    #vertical
 	    for i in range(4):
 	        self.c.create_line(90+i*411, 462, 90+i*411, 870, fill="green")
+
+            for i in range(3):
+                d2 = dic.get(race[i])
+                for r2 in d2.keys():
+                    if r2 == "Protoss":
+                        if d2[r2][1] != 0:
+                            self.c.create_text(295, 513+i*126, text=d2[r2][0], fill="green")
+                            self.c.create_text(295+411, 513+i*126, text=d2[r2][1]-d2[r2][0], fill="green")
+                            self.c.create_text(295+411*2, 513+i*126, text=float(d2[r2][0])/d2[r2][1] *100, fill="green")
+
+                    elif r2 == "Terran":
+                        if d2[r2][1] != 0:
+                            self.c.create_text(295, 513+42+i*126, text=d2[r2][0], fill="green")
+                            self.c.create_text(295+411, 513+42+i*126, text=d2[r2][1]-d2[r2][0], fill="green")
+                            self.c.create_text(295+411*2, 513+42+i*126, text=float(d2[r2][0])/d2[r2][1] *100, fill="green")
+
+                    elif r2 == "Zerg":
+                        if d2[r2][1] != 0:
+                            self.c.create_text(295, 513+84+i*126, text=d2[r2][0], fill="green")
+                            self.c.create_text(295+411, 513+84+i*126, text=d2[r2][1]-d2[r2][0], fill="green")
+                            self.c.create_text(295+411*2, 513+84+i*126, text=float(d2[r2][0])/d2[r2][1] *100, fill="green")
+
 
            
 def start():
