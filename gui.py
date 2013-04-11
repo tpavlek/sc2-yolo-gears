@@ -328,7 +328,8 @@ class App:
                             self.c.create_text(295+411, 513+84+i*126, text=d2[r2][1]-d2[r2][0], fill="green")
                             self.c.create_text(295+411*2, 513+84+i*126, text=float(d2[r2][0])/d2[r2][1] *100, fill="green")
 
-
+    def clearTable(self):
+        self.c.create_rectangle(25, 450, 1375, 875, outline="green", fill="black")
            
 def start():
     root = Tk()
