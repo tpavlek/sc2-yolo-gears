@@ -72,7 +72,6 @@ class ProcessedReplays:
             for replay in self.replays:
                 for team in replay.teams:
                     for player in team:
-                        print(player.result)
                         if player.result == 'Win':
                             winner = player
                         else:

@@ -224,7 +224,6 @@ class App:
                 count = 0
                 avg = 0
 
-        #print(data)
         self.displayGraph(data, kwargs.get("time"), year = yr, month = mon)
 
     def displayGraph(self, data, time, **kwargs):
@@ -238,8 +237,6 @@ class App:
                 self.c.create_text(80+dx/2+i*dx, 380, text = str(yr), tags=str(yr) + "b", activefill="Red")
                 self.c.tag_bind(str(yr) + "b", "<ButtonPress-1>", lambda e, y = yr: self.selGraph(time="month", year=str(y)))
                 yr += 1
-            for e in self.c.find_all():
-                print self.c.gettags(e)
         
 
         elif time == "month":
