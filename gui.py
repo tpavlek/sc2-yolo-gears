@@ -117,7 +117,9 @@ class App:
         
         # These should be refactored out into a redraw function in the future
         self.clearGraph()
+        self.clearTable()
         self.analyzeData(self.getAPMDict(True), time = "month", year="2013")
+        self.displayTable(self.getWRDict(), type="winrate") # no need for reload since we just did
 
     def getAPMDict(self, reload = False):
         """
