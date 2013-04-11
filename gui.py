@@ -32,7 +32,7 @@ class App:
 
         self.Help = Menu(self.menuBar, tearoff = 0)
         self.menuBar.add_cascade(label='Help', menu=self.Help)
-        self.Help.add_command(label = 'About')
+        self.Help.add_command(label = 'About', command = self.showHelp)
 
         master.config(menu = self.menuBar)
 
@@ -95,7 +95,16 @@ class App:
 	for i in range(4):
 	    self.c.create_line(90+i*411, 462, 90+i*411, 870, fill="green")
 	"""
+    def showHelp(self):
+        popup = Toplevel()
+        popup.title("About SC2-YOLO-Gears")
+        about_message = "By Andy Yao and Troy Pavlek. You should use SC2Gears instead"
+        msg = Message(popup, text=about_message)
+        msg.pack()
 
+        button = Button(popup, text="Close", command=popup.destroy)
+        button.pack()
+    
     def selRep(self):
         filename = askopenfilename()
         self.replayPath = filename
@@ -103,7 +112,6 @@ class App:
     def selFol(self):
         dire = askdirectory()
         self.replayPath = dire
-        print( self.getAPMDict())
         self.analyzeData(self.getAPMDict(), time = "year")
 
     def getAPMDict(self):
@@ -201,7 +209,6 @@ class App:
                 day += 1
                 count = 0
                 avg = 0
-            print(data)
 
         #print(data)
         self.displayGraph(data, kwargs.get("time"), year = yr, month = mon)
