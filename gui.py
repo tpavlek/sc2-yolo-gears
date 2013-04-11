@@ -72,7 +72,7 @@ class App:
         for i in range(len(data)-1):
             self.c.create_line(x[i],y[i],x[i+1],y[i+1],fill = "blue")
 	"""
-	self.analyzeData(self.getAPMDict(), time ="month", year = "2013")
+        self.analyzeData(self.getAPMDict(), time ="month", year = "2013")
         #b = Button(frame, text = "APM", command = self.analyzeData(self.getAPMDict(), time ="month", year = "2013" ))
         #b.pack()
 
@@ -80,7 +80,7 @@ class App:
         self.c.create_rectangle(25, 450, 1375, 875, outline="green", fill="black")
         self.displayTable(self.getWRDict(), type="winrate")
 
-	"""
+        """
 	MU = ["PvZ", "PvT", "PvP", "ZvZ", "ZvT", "ZvP", "TvZ", "TvT", "TvP"]
 	self.c.create_text(295, 471, text = "Wins", fill="green")
 	self.c.create_text(295+411, 471, text = "Losses", fill="green")
@@ -117,11 +117,11 @@ class App:
         return self.replays.getWinrates()
 
     def selGraph(self, *args, **kwargs):
-	if kwargs.get("time") == "year":
-	    self.clearGraph()
-	    self.analyzeData(self.getAPMDict(), time = "year")
+        if kwargs.get("time") == "year":
+            self.clearGraph()
+            self.analyzeData(self.getAPMDict(), time = "year")
 	
-	elif kwargs.get("time") == "month":
+        elif kwargs.get("time") == "month":
             self.clearGraph()
             self.analyzeData(self.getAPMDict(), time = "month", year = kwargs.get("year"))
 
@@ -266,7 +266,7 @@ class App:
             self.c.create_line(x[i],y[i],x[i+1],y[i+1], fill="blue")
 
     def clearGraph(self, *args):
-	self.c.create_rectangle(25,25,1375,400, outline="blue", fill="white")
+        self.c.create_rectangle(25,25,1375,400, outline="blue", fill="white")
         self.c.create_line(80, 370, 1320, 370, arrow=LAST)  #horizontal
         self.c.create_line(80, 30, 80, 370, arrow=FIRST)    #vertical
 
@@ -275,18 +275,18 @@ class App:
         if kwargs.get("type") == "winrate":
             race = ["Protoss", "Terran", "Zerg"]
             MU = ["PvP", "PvT", "PvZ", "TvP", "TvT", "TvZ", "ZvP", "ZvT", "ZvZ"]
-	    self.c.create_text(295, 471, text = "Wins", fill="green")
-	    self.c.create_text(295+411, 471, text = "Losses", fill="green")
-	    self.c.create_text(295+411*2, 471, text = "Win Rate", fill="green")
+            self.c.create_text(295, 471, text = "Wins", fill="green")
+            self.c.create_text(295+411, 471, text = "Losses", fill="green")
+            self.c.create_text(295+411*2, 471, text = "Win Rate", fill="green")
 
 	    # horizontal
-	    for i in range(10):
-	        self.c.create_line(50, 450+42+42*i, 1324, 450+42+42*i, fill="green")
-	        if i > 0:
+            for i in range(10):
+                self.c.create_line(50, 450+42+42*i, 1324, 450+42+42*i, fill="green")
+                if i > 0:
                     self.c.create_text(70, 450+42/2+42*i, text = MU[i-1], fill="green")
 	    #vertical
-	    for i in range(4):
-	        self.c.create_line(90+i*411, 462, 90+i*411, 870, fill="green")
+            for i in range(4):
+                self.c.create_line(90+i*411, 462, 90+i*411, 870, fill="green")
 
             for i in range(3):
                 d2 = dic.get(race[i])
