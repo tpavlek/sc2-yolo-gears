@@ -9,8 +9,8 @@ class App:
         frame.pack()
 
         self.menuBar = Menu(master)
-        self.username = 'bonywonix' #TODO this needs to be set via preferences window
-        self.replayPath = "replays/"
+        self.username = 'bonywonix' #this is a default for demo - in future versions this would be set via a config file 
+        self.replayPath = "replays/" #default
         self.replays = None # This is so we can check for instances later
         
         #Replay Menu
@@ -36,6 +36,7 @@ class App:
 
         master.config(menu = self.menuBar)
 
+        #canvas to draw graph on
         
         self.c = Canvas(master, width=1400, height=900)
         self.c.pack()
@@ -45,34 +46,9 @@ class App:
         self.c.create_line(80, 370, 1320, 370, arrow=LAST)  #horizontal
         self.c.create_line(80, 30, 80, 370, arrow=FIRST)    #vertical
  
-        """
-        data = [0,50,25,30,44,54,2,345,56,111,45,76,200,86,220,50,25,30,44,54,2,345,56,111,45,76,200,86,22,98,67]
-#x axis
-        dx = 40
-        day = 1
-        for i in range(len(data)):
-            self.c.create_line(80+dx+i*dx, 370, 80+dx+i*dx, 380)
-            self.c.create_text(80+dx/2+i*dx, 380, text = str(day))
-            day += 1
-
-        #y axis
-        interval = (max(data) - min(data))/10
-        for i in range(11):
-            self.c.create_line(70, 370-i*33, 80, 370-i*33)
-            self.c.create_text(60, 370-i*33, text = str(min(data)+i*interval))
-
-        #generate points and lines
-        x = []
-        y = []
-        for i in range(len(data)):
-            self.c.create_oval(80+dx/2+i*dx, 370-data[i]*33/interval, 80+dx/2+i*dx, 370-data[i]*33/interval, fill = "blue", width = 4)
-            x.append(80+dx/2+i*dx)
-            y.append(370-data[i]*33/interval)
-
-        for i in range(len(data)-1):
-            self.c.create_line(x[i],y[i],x[i+1],y[i+1],fill = "blue")
-	"""
         self.analyzeData(self.getAPMDict(), time ="month", year = "2013")
+        
+        #A button for future implementations where graph shows things other than APM
         #b = Button(frame, text = "APM", command = self.analyzeData(self.getAPMDict(), time ="month", year = "2013" ))
         #b.pack()
 
@@ -80,22 +56,12 @@ class App:
         self.c.create_rectangle(25, 450, 1375, 875, outline="green", fill="black")
         self.displayTable(self.getWRDict(), type="winrate")
 
-        """
-	MU = ["PvZ", "PvT", "PvP", "ZvZ", "ZvT", "ZvP", "TvZ", "TvT", "TvP"]
-	self.c.create_text(295, 471, text = "Wins", fill="green")
-	self.c.create_text(295+411, 471, text = "Losses", fill="green")
-	self.c.create_text(295+411*2, 471, text = "Win Rate", fill="green")
+        # We're done with init
 
-	# horizontal
-        for i in range(10):
-            self.c.create_line(50, 450+42+42*i, 1324, 450+42+42*i, fill="green")
-	    if i > 0:
-		self.c.create_text(70, 450+42/2+42*i, text = MU[i-1], fill="green")
-	#vertical
-	for i in range(4):
-	    self.c.create_line(90+i*411, 462, 90+i*411, 870, fill="green")
-	"""
     def showHelp(self):
+        """
+        The help window including author information
+        """
         popup = Toplevel()
         popup.title("About SC2-YOLO-Gears")
         about_message = "By Andy Yao and Troy Pavlek. You should use SC2Gears instead"
@@ -106,6 +72,9 @@ class App:
         button.pack()
 
     def showPrefs(self):
+        """
+        Preferences Dialog
+        """
         popup = Toplevel()
         popup.title("Edit Preferences")
 
@@ -121,21 +90,40 @@ class App:
         submit.pack()
 
     def editPrefs(self, newUser, popup):
+        """
+        Edits the preferences in the object state
+        In future implementations would write to a configuration file
+        Takes a string with a new username preference and the object reference of the edit dialog to destroy
+        """
         self.username = newUser
         popup.destroy()
 
 
     def selRep(self):
+        """
+        Doesn't serve a useful function curently, but might in future implementations
+        (Individual replay analysis, would require restructuring of the UX to accomadate for the graph
+        disappearing)
+        """
         filename = askopenfilename()
-        self.replayPath = filename
+        #self.replayPath = filename
 
     def selFol(self):
+        """
+        Prompts the user for a new folder and sets the internal object state to that folder
+        """
         dire = askdirectory()
         self.replayPath = dire
+        
+        # These should be refactored out into a redraw function in the future
         self.clearGraph()
         self.analyzeData(self.getAPMDict(True), time = "month", year="2013")
 
     def getAPMDict(self, reload = False):
+        """
+        If this is the first time we're asking for APM or WR then we need to process all the replays 
+        (may take a while). We can also force the reprocessing witht he optional reload argument
+        """
         if self.replays is None or reload:
             self.replays = processed_replays.ProcessedReplays(self.username, self.replayPath)
         return self.replays.getAPM()
@@ -146,6 +134,11 @@ class App:
         return self.replays.getWinrates()
 
     def selGraph(self, *args, **kwargs):
+        """
+        Selects the graph to display, and then hands it off to analyzeData for processing.
+        kwargs contains:
+        TODO ANDY FILL THIS
+        """
         if kwargs.get("time") == "year":
             self.clearGraph()
             self.analyzeData(self.getAPMDict(), time = "year")
@@ -158,13 +151,11 @@ class App:
             self.clearGraph()
             self.analyzeData(self.getAPMDict(), time = "day", year = kwargs.get("year"), month = kwargs.get("month"))
 
-    def debug(self, *args):
-        print("a")
-
     def analyzeData(self, dic, **kwargs):
         """
-        Takes a dictionary of average APMs along with potenital arguments. The optional
-        arguments are:
+        Takes a dictionary of average APMs along with potenital arguments.
+        kwargs contains:
+        TODO ANDY FILL THIS
         """
 
         avg = 0
